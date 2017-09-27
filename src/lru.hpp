@@ -1,11 +1,7 @@
 #ifndef LRU_HPP_
 #define LRU_HPP_
 
-#include <stdio.h>
-#include <iostream>
-#include <string>
 #include <unordered_map>
-#include <memory>
 #include <list>
 #include <cassert>
 

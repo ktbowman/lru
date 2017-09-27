@@ -1,9 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
-#include <vector>
-#include <algorithm>
 #include <lru.hpp>
+#include <algorithm>
 #include <cassert>
 #include <iostream>
 
@@ -25,7 +21,6 @@ public:
 int hash(const item& data) {
   return data.value;
 }
-
 
 //!*************************************
 int main(int argc, const char* argv[]) {
