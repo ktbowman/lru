@@ -1,3 +1,2 @@
-bin_PROGRAMS = hello
-hello_SOURCES = main.cc
-
+bin_PROGRAMS = lru
+lru_SOURCES = main.cc
