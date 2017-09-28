@@ -114,10 +114,14 @@ bool LRU<K,T>::put(const K& key, const T& user_item){
   // Currently not supporting duplicates, I know, lame.
   // Checking here so list and map are consistent. This is
   // Advertised as constant O(c) in most cases.
-  if ( hash_cont.end() != hash_cont.find(key) ) {
+#if 0
+  class std::unordered_map<K, class hash_item<K,T>>::iterator it;
+  it = hash_cont.find(key);
+  if ( (hash_cont.end() != it) && ()  ) {
     rc = false;
   }
-
+#endif
+  
   if ( rc ) {    
     // Create the element for the linked list, maintains priority
     list_item<K> list_item_tmp;
