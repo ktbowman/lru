@@ -30,22 +30,22 @@ int main(int argc, const char* argv[]) {
   int testndx = 1;
   
   user_item.value = 0x111;
-  assert(lru.put(user_item));
+  assert(lru.put(user_item.value, user_item));
   assert(lru.count()==1);
   std::cout << testndx++ << " Add 1 item and confirm 1 item in the LRU." << std::endl;
 
   user_item.value = 0x222;
-  assert(lru.put(user_item));
+  assert(lru.put(user_item.value, user_item));
   assert(lru.count()==2);
   std::cout << testndx++ << " Add 2nd item and confirm 2 items in the LRU." << std::endl;
 
   user_item.value = 0x333;
-  assert(lru.put(user_item));
+  assert(lru.put(user_item.value, user_item));
   assert(lru.count()==3);
   std::cout << testndx++ << " Add 3rd item and confirm 3 items in the LRU." << std::endl;
 
   user_item.value = 0x333;
-  assert(!lru.put(user_item));
+  assert(!lru.put(user_item.value, user_item));
   assert(lru.count()==3);
   std::cout << testndx++ << " Add duplicate iterm and confirm failure insert and 3 items in the LRU." << std::endl;
 

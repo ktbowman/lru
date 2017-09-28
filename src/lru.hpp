@@ -6,7 +6,7 @@
 #include <cassert>
 
 // TODO - Add support for multiple items with same hash index
-template <class K, class T> class list_item {
+template <class K> class list_item {
 public:
 
   //! Needed for O(1) removal on clear()
@@ -21,7 +21,7 @@ public:
   T  value;
   
   //! Needed for O(1) removal on clear()
-  class std::list<class list_item<K,T>>::iterator     list_it; 
+  class std::list<class list_item<K>>::iterator     list_it; 
   
 };
 
@@ -48,7 +48,7 @@ protected:
   std::unordered_map<K, class hash_item<K,T>>  hash_cont;
 
   //! Used to manage LRU eviction logic
-  std::list<class list_item<K,T>>               list_cont;
+  std::list<class list_item<K>>               list_cont;
   
 public:
 
@@ -69,7 +69,7 @@ public:
 
   //! Adds a T item entry
   // @Return true=success, false=failure 
-  bool put(const T& item);
+  bool put(const K& key, const T& item);
   
 };
 
@@ -92,7 +92,7 @@ bool LRU<K,T>::get(const K& key, T& value){
     rc = false;
   } else {
     hash_item<K,T> hash_item = it->second;
-    list_item<K,T> list_item_tmp = *(hash_item.list_it);
+    list_item<K> list_item_tmp = *(hash_item.list_it);
     value = hash_item.value;
     list_cont.erase(hash_item.list_it);
     list_cont.push_front(list_item_tmp);
@@ -101,13 +101,12 @@ bool LRU<K,T>::get(const K& key, T& value){
 }
 
 template<class K, class T> 
-bool LRU<K,T>::put(const T& user_item){
+bool LRU<K,T>::put(const K& key, const T& user_item){
   bool rc = true;
   
   // Make free space in the list and map
   while ( list_cont.size() >= _max_size ) {
-    K hash_key = list_cont.back().hash_key;
-    hash_cont.erase(hash_key);
+    hash_cont.erase(list_cont.back().hash_key);
     list_cont.pop_back();
   }
   assert(list_cont.size() == hash_cont.size());
@@ -115,14 +114,13 @@ bool LRU<K,T>::put(const T& user_item){
   // Currently not supporting duplicates, I know, lame.
   // Checking here so list and map are consistent. This is
   // Advertised as constant O(c) in most cases.
-  K hash_key = hash(user_item);
-  if ( hash_cont.end() != hash_cont.find(hash_key) ) {
+  if ( hash_cont.end() != hash_cont.find(key) ) {
     rc = false;
   }
 
   if ( rc ) {    
     // Create the element for the linked list, maintains priority
-    list_item<K,T> list_item_tmp;
+    list_item<K> list_item_tmp;
     list_item_tmp.hash_key = hash(user_item);
     list_cont.push_front(list_item_tmp);
     
@@ -130,7 +128,7 @@ bool LRU<K,T>::put(const T& user_item){
     hash_item<K,T> hash_item_tmp;
     hash_item_tmp.list_it = list_cont.begin(); 
     hash_item_tmp.value   = user_item;
-    hash_cont.insert(std::make_pair(hash(user_item), hash_item_tmp));
+    hash_cont.insert(std::make_pair(key, hash_item_tmp));
   }
   
   return rc;
@@ -157,8 +155,7 @@ void LRU<K,T>::max_size(unsigned int new_max_size) {
   
   _max_size = new_max_size;
   while ( list_cont.size() > _max_size ) {
-    K hash_key = list_cont.back().hash_key;
-    hash_cont.erase(hash_key);
+    hash_cont.erase(list_cont.back().hash_key);
     list_cont.pop_back();
   }
   assert(list_cont.size()==hash_cont.size());
