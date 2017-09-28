@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <list>
 #include <cassert>
+#include <iostream>
 
 // TODO - Add support for multiple items with same hash index
 template <class K> class list_item {
@@ -103,7 +104,9 @@ bool LRU<K,T>::get(const K& key, T& value){
 template<class K, class T> 
 bool LRU<K,T>::put(const K& key, const T& user_item){
   bool rc = true;
-  
+
+  assert(list_cont.size()==hash_cont.size());
+
   // Make free space in the list and map
   while ( list_cont.size() >= _max_size ) {
     hash_cont.erase(list_cont.back().hash_key);
@@ -125,7 +128,7 @@ bool LRU<K,T>::put(const K& key, const T& user_item){
   if ( rc ) {    
     // Create the element for the linked list, maintains priority
     list_item<K> list_item_tmp;
-    list_item_tmp.hash_key = hash(user_item);
+    list_item_tmp.hash_key = key;
     list_cont.push_front(list_item_tmp);
     
     // Create the hash entry for the item 
@@ -134,6 +137,9 @@ bool LRU<K,T>::put(const K& key, const T& user_item){
     hash_item_tmp.value   = user_item;
     hash_cont.insert(std::make_pair(key, hash_item_tmp));
   }
+  //std::cout << "list_cont.size() = " << list_cont.size() << std::endl;
+  //std::cout << "hash_cont.size() = " << hash_cont.size() << std::endl;
+  assert(list_cont.size()==hash_cont.size());
   
   return rc;
 
@@ -158,6 +164,7 @@ template<class K, class T>
 void LRU<K,T>::max_size(unsigned int new_max_size) {
   
   _max_size = new_max_size;
+  assert(list_cont.size()==hash_cont.size());
   while ( list_cont.size() > _max_size ) {
     hash_cont.erase(list_cont.back().hash_key);
     list_cont.pop_back();
