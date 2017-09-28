@@ -1,10 +1,18 @@
-*~
+Makefile
 Makefile.in
-aclocal.m4
-autom4te~
-config.*
-install.sh
-stamp-h1
-Makefile*
-install*
+config.h.in~ configure.ac~ Makefile.am~
+*~
+config.h*
+aclocal*
+config.guess*
+config.guess* 
+autom4* 
+compile 
+config.sub 
+depcomp 
+install-sh 
+m4 
+missing 
 configure
+config.*
+*.o

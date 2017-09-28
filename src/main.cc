@@ -93,10 +93,10 @@ int main(int argc, const char* argv[]) {
 
     std::cout << testndx++ << " - clear() itemB and confirm." << std::endl;
     user_item.name = "itemB";
+    user_item.id   = 0;
     lru.clear(user_item.name);
     assert(!lru.get(user_item.name, user_item));
     assert(user_item.id==0x0);
-
   }
 
   // Test with T=std::pair<int,int>

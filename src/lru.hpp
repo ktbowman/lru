@@ -147,9 +147,8 @@ bool LRU<K,T,H,E>::put(const K& key, const T& user_item){
 template<class K, class T, class H, class E>
 void LRU<K,T,H,E>::clear(const K& key){
   assert(list_cont.size() == hash_cont.size());
-  K hash_value = hash(key);
-  list_cont.erase(hash_cont[hash_value].list_it);
-  hash_cont.erase(hash_value);
+  list_cont.erase(hash_cont[key].list_it);
+  hash_cont.erase(key);
   assert(list_cont.size() == hash_cont.size());
 }
 
