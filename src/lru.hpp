@@ -5,6 +5,7 @@
 #include <list>
 #include <cassert>
 #include <iostream>
+#include <iterator>
 
 // TODO - Add support for multiple items with same hash index
 template <class K> class list_item {
@@ -39,17 +40,17 @@ public:
 //     - clear()
 //     - LRU eviction
 // - Add item. Includes adding item to the list and has 
-template <class K, class T> class LRU {
+template <class K, class T, class H, class E> class LRU {
 protected:
 
   //! Maximum size of the LRU 
   int _max_size;
 
   //! Used to to store the LRU data, O(1) access 
-  std::unordered_map<K, class hash_item<K,T>>  hash_cont;
+  std::unordered_map<K, class hash_item<K,T>, H, E>  hash_cont;
 
   //! Used to manage LRU eviction logic
-  std::list<class list_item<K>>               list_cont;
+  std::list<class list_item<K>>                       list_cont;
   
 public:
 
@@ -75,34 +76,32 @@ public:
 };
 
 
-template<class K, class T>
-LRU<K,T>::LRU(int new_max_size):
+template<class K, class T, class H, class E>
+LRU<K,T,H,E>::LRU(int new_max_size):
   _max_size(new_max_size) {
 }
 
-template<class K, class T>
-bool LRU<K,T>::get(const K& key, T& value){
+template<class K, class T, class H, class E>
+bool LRU<K,T,H,E>::get(const K& key, T& value){
   bool rc = true;
-  class std::unordered_map<K, class hash_item<K,T>>::iterator it;
-  it = hash_cont.find(key);
+  class std::unordered_map<K, class hash_item<K,T>, H, E>::iterator hash_it;
+  hash_it = hash_cont.find(key);
 
   // Disabling duplicates because of short amount oi time. To allow
   // duplicates would change hash_item to contain list of entries
   // instead of a single entry.
-  if ( hash_cont.end() == it ) {
+  if ( hash_cont.end() == hash_it ) {
     rc = false;
+    std::cerr << __FUNCTION__ << "() - Failed to find item." << std::endl;
   } else {
-    hash_item<K,T> hash_item = it->second;
-    list_item<K> list_item_tmp = *(hash_item.list_it);
-    value = hash_item.value;
-    list_cont.erase(hash_item.list_it);
-    list_cont.push_front(list_item_tmp);
+    value = (hash_it->second).value;
+    std::iter_swap((hash_it->second).list_it, list_cont.begin());
   }
   return rc;
 }
 
-template<class K, class T> 
-bool LRU<K,T>::put(const K& key, const T& user_item){
+template<class K, class T, class H, class E> 
+bool LRU<K,T,H,E>::put(const K& key, const T& user_item){
   bool rc = true;
 
   assert(list_cont.size()==hash_cont.size());
@@ -145,8 +144,8 @@ bool LRU<K,T>::put(const K& key, const T& user_item){
 
 }
 
-template<class K, class T>
-void LRU<K,T>::clear(const K& key){
+template<class K, class T, class H, class E>
+void LRU<K,T,H,E>::clear(const K& key){
   assert(list_cont.size() == hash_cont.size());
   K hash_value = hash(key);
   list_cont.erase(hash_cont[hash_value].list_it);
@@ -154,14 +153,14 @@ void LRU<K,T>::clear(const K& key){
   assert(list_cont.size() == hash_cont.size());
 }
 
-template<class K, class T>
-int LRU<K,T>::count() {
+template<class K, class T, class H, class E>
+int LRU<K,T,H,E>::count() {
   assert(list_cont.size()==hash_cont.size());
     return(list_cont.size());
 };
 
-template<class K, class T>
-void LRU<K,T>::max_size(unsigned int new_max_size) {
+template<class K, class T, class H, class E>
+void LRU<K,T,H,E>::max_size(unsigned int new_max_size) {
   
   _max_size = new_max_size;
   assert(list_cont.size()==hash_cont.size());
