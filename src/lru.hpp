@@ -7,39 +7,35 @@
 #include <iostream>
 #include <iterator>
 
-// TODO - Add support for multiple items with same hash index
+//! Used as item in std::list container. Maintains priority state. 
 template <class K> class list_item {
 public:
 
-  //! Needed for O(1) removal on clear()
+  //! Key to reference item in hash. Needed for O(1) removal on clear()
   K                  hash_key; 
 };
 
-// TODO - Add support for multiple items with same hash index
-//        Would 
+//! Item saved in hash container. 
 template <class K, class T> class hash_item {
 public:
-  //!
+
+  //! User defined data type.
   T  value;
   
-  //! Needed for O(1) removal on clear()
+  //! Location of item the std::list. Relative location is based
+  //! on time (LRU).
   class std::list<class list_item<K>>::iterator     list_it; 
   
 };
 
 #define MAX_LRU_SIZE 10
 
-//!
-// Requirements:
-// - Remove LRU item. Includes removing from the list and the hash
-//   - Can be result of:
-//     - clear()
-//     - LRU eviction
-// - Remove hash item. Includes removing from the list and the hash
-//   - Can be result of:
-//     - clear()
-//     - LRU eviction
-// - Add item. Includes adding item to the list and has 
+//! @brief LRU Cache
+//  Supports:
+//  - Supports duplicate keys with collisions.
+//  - Limiting size.
+//  - Adding item(s) with eviction as necessary
+//  - Removing item(s) based on LRU logic.
 template <class K, class T, class H, class E> class LRU {
 protected:
 
@@ -87,9 +83,6 @@ bool LRU<K,T,H,E>::get(const K& key, T& value){
   class std::unordered_map<K, class hash_item<K,T>, H, E>::iterator hash_it;
   hash_it = hash_cont.find(key);
 
-  // Disabling duplicates because of short amount oi time. To allow
-  // duplicates would change hash_item to contain list of entries
-  // instead of a single entry.
   if ( hash_cont.end() == hash_it ) {
     rc = false;
     std::cerr << __FUNCTION__ << "() - Failed to find item." << std::endl;
@@ -113,29 +106,18 @@ bool LRU<K,T,H,E>::put(const K& key, const T& user_item){
   }
   assert(list_cont.size() == hash_cont.size());
 
-  // Currently not supporting duplicates, I know, lame.
-  // Checking here so list and map are consistent. This is
-  // Advertised as constant O(c) in most cases.
-#if 0
-  class std::unordered_map<K, class hash_item<K,T>>::iterator it;
-  it = hash_cont.find(key);
-  if ( (hash_cont.end() != it) && ()  ) {
-    rc = false;
-  }
-#endif
   
-  if ( rc ) {    
-    // Create the element for the linked list, maintains priority
-    list_item<K> list_item_tmp;
-    list_item_tmp.hash_key = key;
-    list_cont.push_front(list_item_tmp);
-    
-    // Create the hash entry for the item 
-    hash_item<K,T> hash_item_tmp;
-    hash_item_tmp.list_it = list_cont.begin(); 
-    hash_item_tmp.value   = user_item;
-    hash_cont.insert(std::make_pair(key, hash_item_tmp));
-  }
+  // Create the element for the linked list, maintains priority
+  list_item<K> list_item_tmp;
+  list_item_tmp.hash_key = key;
+  list_cont.push_front(list_item_tmp);
+  
+  // Create the hash entry for the item 
+  hash_item<K,T> hash_item_tmp;
+  hash_item_tmp.list_it = list_cont.begin(); 
+  hash_item_tmp.value   = user_item;
+  hash_cont.insert(std::make_pair(key, hash_item_tmp));
+
   //std::cout << "list_cont.size() = " << list_cont.size() << std::endl;
   //std::cout << "hash_cont.size() = " << hash_cont.size() << std::endl;
   assert(list_cont.size()==hash_cont.size());
