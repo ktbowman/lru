@@ -1,10 +1,57 @@
 AC_INIT([amFindFirstUnique], [1.0], [bug-automake@gnu.org])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PROG_CXX
+AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
  Makefile
  src/Makefile
 ])
+
+# Checks for programs.
+AC_PROG_CC
+AC_PROG_CXX
+AC_LANG([C],[C++])
+
+# Check for C++11
+AC_LANG_PUSH([C++])
+AX_CXX_COMPILE_STDCXX_11([noext])
+AC_LANG_POP([C++])
+
+
+dnl AC_ENABLE_SHARED
+dnl AC_DISABLE_STATIC
+dnl AC_PROG_LIBTOOL(libtool)
+
+AM_INIT_AUTOMAKE
+AC_CANONICAL_HOST
+AC_PROG_LIBTOOL
+AC_PROG_GREP
+AC_PROG_EGREP
+AC_PROG_CXX
+
+AX_BOOST_BASE([1.53],,[AC_MSG_ERROR([projectX needs Boost, but it was not found in your system])])
+ 
+AX_BOOST_SYSTEM
+AX_BOOST_THREAD
+
 AC_OUTPUT
 
+# Define gtest variables 
+GTEST_VERSION="1.7.0"
+if test "x$have_pthread" = "xyes"; then
+  GTEST_CPPFLAGS="-DGTEST_HAS_PTHREAD=1"
+  GTEST_CXXFLAGS="$PTHREAD_CFLAGS"
+  GTEST_LDFLAGS=
+  GTEST_LIBS="$PTHREAD_LIBS"
+else
+  GTEST_CPPFLAGS="-DGTEST_HAS_PTHREAD=0"
+  GTEST_CXXFLAGS=
+  GTEST_LDFLAGS=
+  GTEST_LIBS=
+fi
+AC_SUBST([GTEST_VERSION])
+AC_SUBST([GTEST_CPPFLAGS])
+AC_SUBST([GTEST_CXXFLAGS])
+AC_SUBST([GTEST_LDFLAGS])
+AC_SUBST([GTEST_LIBS])

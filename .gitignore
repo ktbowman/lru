@@ -11,7 +11,6 @@ compile
 config.sub 
 depcomp 
 install-sh 
-m4 
 missing 
 configure
 config.*
